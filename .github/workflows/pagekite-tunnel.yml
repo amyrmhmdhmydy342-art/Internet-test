@@ -1,21 +1,23 @@
-name: PageKite Tunnel Test
+name: Simple Connection Test
 
 on:
   workflow_dispatch:
 
 jobs:
-  tunnel:
+  connection-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Install PageKite
+      - name: Test outbound connection to HTTP website
         run: |
-          sudo apt update
-          sudo apt install -y pagekite
+          echo "Trying to connect to a neutral website (httpbin.org) via HTTP..."
+          curl -v http://httpbin.org/ip
           
-      - name: Start Simple Web Server
+      - name: Test outbound connection to HTTPS website
         run: |
-          python3 -m http.server 8080 &
+          echo "Trying to connect to a neutral website (httpbin.org) via HTTPS..."
+          curl -v https://httpbin.org/ip
           
-      - name: Start PageKite Tunnel
+      - name: Check DNS resolution
         run: |
-          pagekite 8080 test-iran-tunnel-$(date +%s).pagekite.me
+          echo "Checking DNS resolution for google.com..."
+          nslookup google.com
