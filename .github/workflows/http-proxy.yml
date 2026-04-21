@@ -1,0 +1,19 @@
+name: Simple HTTP Proxy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  proxy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start HTTP Proxy with socat
+        run: |
+          echo "Starting HTTP proxy on port 8080..."
+          # این دستور یک پراکسی HTTP ساده راه‌اندازی می‌کند که درخواست‌ها را به اینترنت می‌فرستد
+          socat TCP-LISTEN:8080,fork,reuseaddr TCP:httpbin.org:80 &
+          echo "Proxy started!"
+          
+          # برای اینکه Workflow زود تمام نشود، یک حلقه بی‌نهایت ایجاد می‌کنیم
+          echo "Keeping the tunnel alive for 10 minutes..."
+          sleep 600
