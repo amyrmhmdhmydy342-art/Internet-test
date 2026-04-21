@@ -1,0 +1,16 @@
+name: Internet Connectivity Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-internet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test connection to international internet
+        run: |
+          echo "Testing connection to Google (8.8.8.8)..."
+          ping -c 4 8.8.8.8
+          echo ""
+          echo "Testing connection to a website outside Iran..."
+          curl -I https://www.wikipedia.org
