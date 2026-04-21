@@ -1,0 +1,21 @@
+name: PageKite Tunnel Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tunnel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PageKite
+        run: |
+          sudo apt update
+          sudo apt install -y pagekite
+          
+      - name: Start Simple Web Server
+        run: |
+          python3 -m http.server 8080 &
+          
+      - name: Start PageKite Tunnel
+        run: |
+          pagekite 8080 test-iran-tunnel-$(date +%s).pagekite.me
