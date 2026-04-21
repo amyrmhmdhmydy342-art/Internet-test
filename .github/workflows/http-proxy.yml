@@ -1,4 +1,4 @@
-name: Simple HTTP Proxy
+name: Simple HTTP Proxy with Tunnel
 
 on:
   workflow_dispatch:
@@ -7,13 +7,21 @@ jobs:
   proxy:
     runs-on: ubuntu-latest
     steps:
-      - name: Start HTTP Proxy with socat
+      - name: Install SSH client (for localhost.run)
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+        
+      - name: Start HTTP Proxy and Create Tunnel
         run: |
           echo "Starting HTTP proxy on port 8080..."
-          # این دستور یک پراکسی HTTP ساده راه‌اندازی می‌کند که درخواست‌ها را به اینترنت می‌فرستد
+          # راه‌اندازی پراکسی socat در پس‌زمینه
           socat TCP-LISTEN:8080,fork,reuseaddr TCP:httpbin.org:80 &
-          echo "Proxy started!"
           
-          # برای اینکه Workflow زود تمام نشود، یک حلقه بی‌نهایت ایجاد می‌کنیم
-          echo "Keeping the tunnel alive for 10 minutes..."
+          echo "Creating public tunnel to our proxy using localhost.run..."
+          echo "============================================================="
+          echo "YOUR PROXY URL WILL APPEAR BELOW THIS LINE (wait up to 30 seconds):"
+          # ایجاد تونل. از آنجایی که localhost.run نیاز به SSH دارد، یک دستور ssh می‌فرستیم.
+          # توجه: گاهی اوقات localhost.run خطاهای موقت می‌دهد. اگر بار اول جواب نداد، Workflow را دوباره اجرا کنید.
+          ssh -o "StrictHostKeyChecking=no" -R 80:localhost:8080 localhost.run
+          
+          echo "Tunnel established. Keeping it alive for 10 minutes..."
           sleep 600
