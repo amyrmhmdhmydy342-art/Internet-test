@@ -1,26 +1,25 @@
-name: HTTP Proxy with Bore Tunnel
+name: Secure Tunnel with Cloudflare
 
 on:
   workflow_dispatch:
 
 jobs:
-  proxy:
+  tunnel:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Bore
+      - name: Install cloudflared
         run: |
-          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.2/bore-v0.5.2-x86_64-unknown-linux-musl.tar.gz | tar xz
-          chmod +x bore
-          sudo mv bore /usr/local/bin/
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
 
-      - name: Start HTTP Proxy
+      - name: Start Simple Web Server
         run: |
           python3 -m http.server 8080 &
 
-      - name: Create Bore Tunnel
+      - name: Create Cloudflare Tunnel
         run: |
-          echo "Creating public tunnel to our proxy..."
-          echo "=================================="
-          echo "YOUR PROXY URL WILL APPEAR BELOW:"
-          # اجرای تونل. bore یک لینک عمومی ایجاد می‌کند
-          bore local 8080 --to bore.pub
+          echo "Creating secure public tunnel to our server..."
+          echo "==============================================="
+          echo "YOUR SECURE URL WILL APPEAR BELOW:"
+          cloudflared tunnel --url http://localhost:8080 --no-autoupdate
