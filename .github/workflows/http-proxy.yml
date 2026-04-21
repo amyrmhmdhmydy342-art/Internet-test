@@ -1,4 +1,4 @@
-name: Simple HTTP Proxy with Tunnel
+name: HTTP Proxy with Bore Tunnel
 
 on:
   workflow_dispatch:
@@ -7,21 +7,20 @@ jobs:
   proxy:
     runs-on: ubuntu-latest
     steps:
-      - name: Install SSH client (for localhost.run)
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
-        
-      - name: Start HTTP Proxy and Create Tunnel
+      - name: Install Bore
         run: |
-          echo "Starting HTTP proxy on port 8080..."
-          # راه‌اندازی پراکسی socat در پس‌زمینه
-          socat TCP-LISTEN:8080,fork,reuseaddr TCP:httpbin.org:80 &
-          
-          echo "Creating public tunnel to our proxy using localhost.run..."
-          echo "============================================================="
-          echo "YOUR PROXY URL WILL APPEAR BELOW THIS LINE (wait up to 30 seconds):"
-          # ایجاد تونل. از آنجایی که localhost.run نیاز به SSH دارد، یک دستور ssh می‌فرستیم.
-          # توجه: گاهی اوقات localhost.run خطاهای موقت می‌دهد. اگر بار اول جواب نداد، Workflow را دوباره اجرا کنید.
-          ssh -o "StrictHostKeyChecking=no" -R 80:localhost:8080 localhost.run
-          
-          echo "Tunnel established. Keeping it alive for 10 minutes..."
-          sleep 600
+          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.2/bore-v0.5.2-x86_64-unknown-linux-musl.tar.gz | tar xz
+          chmod +x bore
+          sudo mv bore /usr/local/bin/
+
+      - name: Start HTTP Proxy
+        run: |
+          python3 -m http.server 8080 &
+
+      - name: Create Bore Tunnel
+        run: |
+          echo "Creating public tunnel to our proxy..."
+          echo "=================================="
+          echo "YOUR PROXY URL WILL APPEAR BELOW:"
+          # اجرای تونل. bore یک لینک عمومی ایجاد می‌کند
+          bore local 8080 --to bore.pub
